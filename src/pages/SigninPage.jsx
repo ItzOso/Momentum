@@ -119,6 +119,12 @@ function SignInPage() {
             {errors.password && (
               <p className="text-red-400">{errors.password?.message}</p>
             )}
+            <Link
+              to="/forgot-password"
+              className="text-end text-primary text-sm"
+            >
+              Forgot password?
+            </Link>
           </div>
 
           <button
@@ -131,6 +137,7 @@ function SignInPage() {
             )}
             {isSubmitting ? "Signing in..." : "Sign In"}
           </button>
+
           <div className="mt-2">
             <hr className="text-gray-200" />
             <p className="-mt-3 text-text bg-white px-3 w-fit mx-auto text-sm text-gray-600">
