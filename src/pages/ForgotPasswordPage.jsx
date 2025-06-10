@@ -104,8 +104,11 @@ function ForgotPasswordPage() {
               >
                 Send password reset email
               </button>
-              <Link className="text-primary text-center mt-1" to="/signin">
-                Return to sign in
+              <Link
+                className="text-primary text-center text-sm mt-1"
+                to="/signin"
+              >
+                Return to Sign In
               </Link>
             </form>
           )}

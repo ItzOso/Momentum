@@ -68,10 +68,10 @@ function SignupPage() {
   return (
     <div className="h-[calc(100vh-64px)] flex items-center justify-center">
       <div className="max-w-md w-full">
-        <p className="text-center textGradient text-3xl font-bold">
+        <p className="text-center textGradient text-2xl font-bold">
           Welcome to Momentum!
         </p>
-        <p className="text-center text-gray-600 mb-4">
+        <p className="text-center text-sm text-gray-600 mb-4">
           Sign up to start managing your projects effectively
         </p>
 
@@ -84,8 +84,13 @@ function SignupPage() {
               {error}
             </p>
           )}
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email">Email</label>
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-gray-600"
+            >
+              Email
+            </label>
             <input
               type="text"
               className="input"
@@ -98,8 +103,13 @@ function SignupPage() {
             )}
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="password">Password</label>
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-gray-600"
+            >
+              Password
+            </label>
             <div className="relative">
               <input
                 type={showPass ? "text" : "password"}
@@ -125,24 +135,29 @@ function SignupPage() {
             )}
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="confirmPassword">Confirm Password</label>
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="confirmPassword"
+              className="text-sm font-medium text-gray-600"
+            >
+              Confirm Password
+            </label>
             <div className="relative">
               <input
-                type={showPass ? "text" : "password"}
+                type={showConfirmPass ? "text" : "password"}
                 id="confirmPassword"
                 className="input w-full"
                 placeholder="Confirm your password"
                 {...register("confirmPassword")}
               />
-              {!showPass ? (
+              {!showConfirmPass ? (
                 <FaEye
-                  onClick={() => setShowPass(true)}
+                  onClick={() => setShowConfirmPass(true)}
                   className="absolute right-4 top-3 text-text-light text-lg cursor-pointer text-gray-600"
                 />
               ) : (
                 <FaEyeSlash
-                  onClick={() => setShowPass(false)}
+                  onClick={() => setShowConfirmPass(false)}
                   className="absolute right-4 top-3 text-text-light text-lg cursor-pointer text-gray-600"
                 />
               )}
@@ -155,7 +170,7 @@ function SignupPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="btn-primary btn-icon"
+            className="btn-primary  "
           >
             {isSubmitting && (
               <AiOutlineLoading3Quarters className="animate-spin" />
@@ -173,12 +188,12 @@ function SignupPage() {
             type="button"
             onClick={handleSigninWithGoogle}
             disabled={isSubmitting}
-            className="btn-secondary btn-icon"
+            className="btn-secondary text-gray-600 "
           >
             <img src={googleIcon} alt="google logo icon" />
             <span className="text-text">Sign in with Google</span>
           </button>
-          <p className="text-center text-gray-600">
+          <p className="text-center text-sm text-gray-600">
             Already have an account?{" "}
             <Link to="/signin" className="text-primary">
               Sign in

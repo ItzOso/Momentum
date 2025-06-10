@@ -7,6 +7,7 @@ import PrivateRoute from "./components/auth/PrivateRoute";
 import HomePage from "./pages/HomePage";
 import SignupPage from "./pages/SignupPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import { Toaster } from "react-hot-toast";
 
 function App() {
   return (
@@ -41,6 +42,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         </Routes>
       </BrowserRouter>
+      <Toaster />
     </div>
   );
 }

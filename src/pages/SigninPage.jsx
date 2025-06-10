@@ -64,10 +64,10 @@ function SignInPage() {
   return (
     <div className="h-[calc(100vh-64px)] flex items-center justify-center">
       <div className="max-w-md w-full">
-        <p className="text-center textGradient text-3xl font-bold">
+        <p className="text-center textGradient text-2xl font-bold">
           Welcome Back!
         </p>
-        <p className="text-center text-gray-600 mb-4">
+        <p className="text-center text-sm text-gray-600 mb-4">
           Sign in to continue managing your projects effectively
         </p>
 
@@ -80,8 +80,13 @@ function SignInPage() {
               {error}
             </p>
           )}
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email">Email</label>
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-gray-600"
+            >
+              Email
+            </label>
             <input
               type="text"
               className="input"
@@ -94,8 +99,13 @@ function SignInPage() {
             )}
           </div>
 
-          <div className="flex flex-col gap-1">
-            <label htmlFor="password">Password</label>
+          <div className="flex flex-col gap-2">
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-gray-600"
+            >
+              Password
+            </label>
             <div className="relative">
               <input
                 type={showPass ? "text" : "password"}
@@ -121,7 +131,7 @@ function SignInPage() {
             )}
             <Link
               to="/forgot-password"
-              className="text-end text-primary text-sm"
+              className="self-end text-primary text-sm w-fit"
             >
               Forgot password?
             </Link>
@@ -130,7 +140,7 @@ function SignInPage() {
           <button
             type="submit"
             disabled={isSubmitting}
-            className="btn-primary btn-icon"
+            className="btn-primary  "
           >
             {isSubmitting && (
               <AiOutlineLoading3Quarters className="animate-spin" />
@@ -149,12 +159,12 @@ function SignInPage() {
             type="button"
             onClick={handleSigninWithGoogle}
             disabled={isSubmitting}
-            className="btn-secondary btn-icon"
+            className="btn-secondary text-gray-600"
           >
             <img src={googleIcon} alt="google logo icon" />
             <span className="text-text">Sign in with Google</span>
           </button>
-          <p className="text-center text-gray-600">
+          <p className="text-center text-sm text-gray-600">
             Dont have an account yet?{" "}
             <Link to="/signup" className="text-primary">
               Sign up
