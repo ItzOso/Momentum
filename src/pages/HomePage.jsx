@@ -22,11 +22,19 @@ function HomePage() {
   const { currentUser } = useAuth();
   const [createProjectIsOpen, setCreateProjectIsOpen] = useState(false);
   const [projects, setProjects] = useState([]);
+  const [isFetchingProjects, setIsFetchingProjects] = useState(false);
 
   useEffect(() => {
     const fetchProjects = async () => {
-      const userProjects = await getUserProjects(currentUser.uid);
-      setProjects(userProjects);
+      setIsFetchingProjects(true);
+      try {
+        const userProjects = await getUserProjects(currentUser.uid);
+        setProjects(userProjects);
+      } catch (error) {
+        toast.error("Failed to fetch projects. Try reloading page.");
+      } finally {
+        setIsFetchingProjects(false);
+      }
     };
     fetchProjects();
   }, []);
@@ -102,11 +110,17 @@ function HomePage() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {projects.map((project) => (
-          <ProjectCard key={project.id} project={project} />
-        ))}
-      </div>
+      {isFetchingProjects ? (
+        <div className="w-fit mx-auto mt-36">
+          <Spinner />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {projects.map((project) => (
+            <ProjectCard key={project.id} project={project} />
+          ))}
+        </div>
+      )}
 
       {createProjectIsOpen && (
         <ProjectForm
