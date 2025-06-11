@@ -5,13 +5,6 @@ function ProjectForm({ isOpen, setView, onSubmitFunction }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  useEffect(() => {
-    if (!isOpen) {
-      setTitle("");
-      setDescription("");
-    }
-  }, [isOpen]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -24,7 +17,6 @@ function ProjectForm({ isOpen, setView, onSubmitFunction }) {
     }
   };
 
-  if (!isOpen) return null;
   return (
     <div
       onClick={() => setView(false)}

@@ -108,11 +108,13 @@ function HomePage() {
         ))}
       </div>
 
-      <ProjectForm
-        isOpen={createProjectIsOpen}
-        setView={setCreateProjectIsOpen}
-        onSubmitFunction={handleCreateProject}
-      />
+      {createProjectIsOpen && (
+        <ProjectForm
+          isOpen={createProjectIsOpen}
+          setView={setCreateProjectIsOpen}
+          onSubmitFunction={handleCreateProject}
+        />
+      )}
     </div>
   );
 }
