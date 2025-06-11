@@ -10,18 +10,24 @@ import {
 import toast from "react-hot-toast";
 import { db } from "./firebaseConfig";
 
-export const createProject = async (uid, title, description) => {
+export const createProject = async (uid, projectInfo) => {
   try {
-    if (!title) return;
+    if (!projectInfo.title) return;
     const projectsRef = collection(db, "projects");
     const data = {
       uid,
-      title,
-      description,
+      title: projectInfo.title,
+      description: projectInfo.description,
+      taskStatuses: ["todo", "in_progress", "done"],
+      tasksCount: 0,
+      tasksDoneCount: 0,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
     const projectRef = await addDoc(projectsRef, data);
+
+    // const tasksRef = collection(db, "projects", projectRef.id, "tasks"); <-- this is how to get subcollection collection ref
+
     return { id: projectRef.id, data };
   } catch (error) {
     throw error;

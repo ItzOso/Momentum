@@ -21,25 +21,27 @@ import ProjectCard from "../components/projects/ProjectCard";
 function HomePage() {
   const { currentUser } = useAuth();
   const [createProjectIsOpen, setCreateProjectIsOpen] = useState(false);
+  const [projects, setProjects] = useState([]);
 
   useEffect(() => {
     const fetchProjects = async () => {
       const userProjects = await getUserProjects(currentUser.uid);
-      console.log(userProjects);
+      setProjects(userProjects);
     };
     fetchProjects();
   }, []);
 
   const handleCreateProject = async (title, description) => {
     try {
-      const projectData = await createProject(
-        currentUser.uid,
+      const newProjectData = await createProject(currentUser.uid, {
+        // returns the newly created note and its id in an object
         title,
-        description
-      );
+        description,
+      });
+      setProjects((prevProjects) => [newProjectData, ...prevProjects]);
       toast.success("Project created successfully!");
     } catch (error) {
-      toast.error("Error creating project. Please try again.");
+      toast.error("Failed to create project. Please try again.");
       throw error;
     }
   };
@@ -101,7 +103,9 @@ function HomePage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <ProjectCard />
+        {projects.map((project) => (
+          <ProjectCard key={project.id} project={project} />
+        ))}
       </div>
 
       <ProjectForm

@@ -1,9 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaFolderPlus } from "react-icons/fa";
 
 function ProjectForm({ isOpen, setView, onSubmitFunction }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+
+  useEffect(() => {
+    if (!isOpen) {
+      setTitle("");
+      setDescription("");
+    }
+  }, [isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
