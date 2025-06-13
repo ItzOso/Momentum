@@ -20,7 +20,7 @@ body {
 }
 
 .card {
-  @apply bg-white p-6 border border-gray-200 shadow-sm rounded-lg
+  @apply bg-white p-6 border border-gray-200 shadow-xs rounded-lg
 }
 
 .btn-primary {

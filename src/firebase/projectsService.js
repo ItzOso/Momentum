@@ -2,6 +2,7 @@ import {
   addDoc,
   collection,
   doc,
+  getDoc,
   getDocs,
   query,
   serverTimestamp,
@@ -18,15 +19,13 @@ export const createProject = async (uid, projectInfo) => {
       uid,
       title: projectInfo.title,
       description: projectInfo.description,
-      taskStatuses: ["todo", "in_progress", "done"],
+      taskStatuses: ["todo", "inprogress", "done"],
       tasksCount: 0,
       tasksDoneCount: 0,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
     const projectRef = await addDoc(projectsRef, data);
-
-    // const tasksRef = collection(db, "projects", projectRef.id, "tasks"); <-- this is how to get subcollection collection ref
 
     return { id: projectRef.id, ...data };
   } catch (error) {
@@ -46,6 +45,34 @@ export const getUserProjects = async (uid) => {
       };
     });
     return userProjects;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getProject = async (id) => {
+  try {
+    const projectRef = doc(db, "projects", id);
+    const projectSnapshot = await getDoc(projectRef);
+    if (projectSnapshot.exists())
+      return { id: projectSnapshot.id, ...projectSnapshot.data() };
+    return null;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const getProjectTasks = async (projectId) => {
+  try {
+    const tasksRef = collection(db, "projects", projectId, "tasks");
+    const tasksSnapshots = await getDocs(tasksRef);
+    const projectTasks = tasksSnapshots.docs.map((doc) => {
+      return {
+        ...doc.data(),
+        id: doc.id,
+      };
+    });
+    return projectTasks;
   } catch (error) {
     throw error;
   }

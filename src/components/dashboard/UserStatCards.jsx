@@ -8,6 +8,19 @@ import {
 import StatCard from "../common/StatCard";
 
 function UserStatCards({ projects }) {
+  const totalTasks = projects.reduce(
+    (total, project) => total + project.tasksCount,
+    0
+  );
+  const completedTasks = projects.reduce(
+    (total, project) => total + project.tasksDoneCount,
+    0
+  );
+  const completionRate =
+    totalTasks > 0
+      ? `${Math.round((completedTasks / totalTasks) * 100)}%`
+      : "0%";
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
       <StatCard
@@ -18,25 +31,19 @@ function UserStatCards({ projects }) {
       />
       <StatCard
         title="Total Tasks"
-        stat={projects.reduce(
-          (total, project) => total + project.tasksCount,
-          0
-        )}
+        stat={totalTasks}
         color="purple"
         Icon={FaRegClock}
       />
       <StatCard
         title="Completed"
-        stat={projects.reduce(
-          (total, project) => total + project.tasksDoneCount,
-          0
-        )}
+        stat={completedTasks}
         color="green"
         Icon={FaRegCheckCircle}
       />
       <StatCard
         title="Completion Rate"
-        stat="0%"
+        stat={completionRate}
         color="orange"
         Icon={FaChartLine}
       />
