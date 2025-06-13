@@ -28,7 +28,7 @@ export const createProject = async (uid, projectInfo) => {
 
     // const tasksRef = collection(db, "projects", projectRef.id, "tasks"); <-- this is how to get subcollection collection ref
 
-    return { id: projectRef.id, data };
+    return { id: projectRef.id, ...data };
   } catch (error) {
     throw error;
   }

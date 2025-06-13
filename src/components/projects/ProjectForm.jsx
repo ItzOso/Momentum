@@ -71,10 +71,18 @@ function ProjectForm({ isOpen, setView, onSubmitFunction }) {
             />
           </div>
           <div className="flex gap-2 justify-end">
-            <button onClick={() => setView(false)} className="btn-secondary">
+            <button
+              type="button"
+              onClick={() => setView(false)}
+              className="btn-secondary"
+            >
               Cancel
             </button>
-            <button disabled={!title.trim()} className="btn-primary">
+            <button
+              type="submit"
+              disabled={!title.trim()}
+              className="btn-primary"
+            >
               Create Project
             </button>
           </div>

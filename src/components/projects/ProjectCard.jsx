@@ -2,6 +2,7 @@ import React from "react";
 import { FaRegCalendar, FaRegFolderOpen } from "react-icons/fa";
 import ProgressBar from "../common/ProgressBar";
 import { useNavigate } from "react-router-dom";
+import { formatDate } from "../../utils/helpers";
 
 function ProjectCard({ project }) {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ function ProjectCard({ project }) {
     totalTasks > 0 ? Math.floor((tasksDone / totalTasks) * 100) : 0;
   return (
     <div
-      className="card space-y-6 cursor-pointer"
+      className="card hover:shadow-lg transition-all space-y-6 cursor-pointer"
       onClick={() => navigate(`/project/${project.id}`)}
     >
       <div className="flex justify-between">
@@ -41,7 +42,7 @@ function ProjectCard({ project }) {
         </div>
         <p className="text-xs font-medium text-gray-500 flex items-center justify-center gap-1">
           <FaRegCalendar />
-          6/5/2025
+          {formatDate(project?.updatedAt)}
         </p>
       </div>
     </div>

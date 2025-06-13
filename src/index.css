@@ -5,6 +5,10 @@
   --color-secondary: rgb(59, 130, 246);
 }
 
+body {
+  @apply bg-gradient-to-br from-gray-50 to-gray-100
+}
+
 @utility bgGradient {
   @apply bg-gradient-to-r from-primary to-secondary
 }

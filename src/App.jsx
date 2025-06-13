@@ -8,10 +8,11 @@ import HomePage from "./pages/HomePage";
 import SignupPage from "./pages/SignupPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import { Toaster } from "react-hot-toast";
+import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 
 function App() {
   return (
-    <div className="h-screen w-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="h-screen w-screen ">
       <BrowserRouter>
         <Navbar />
         <Routes>
@@ -20,6 +21,14 @@ function App() {
             element={
               <PrivateRoute>
                 <HomePage />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/project/:id"
+            element={
+              <PrivateRoute>
+                <ProjectDetailsPage />
               </PrivateRoute>
             }
           />
