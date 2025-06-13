@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/layout/Navbar";
 import SigninPage from "./pages/SigninPage";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import PublicRoute from "./components/auth/PublicRoute";

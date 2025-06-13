@@ -23,7 +23,8 @@ import { db } from "../firebase/firebaseConfig";
 import { createProject, getUserProjects } from "../firebase/projectsService";
 import ProjectCard from "../components/projects/ProjectCard";
 import ProjectList from "../components/projects/ProjectList";
-import UserStatCards from "../components/UserStatCards";
+import UserStatCards from "../components/dashboard/UserStatCards";
+import SectionHeader from "../components/common/SectionHeader";
 
 function HomePage() {
   const { currentUser } = useAuth();
@@ -84,21 +85,14 @@ function HomePage() {
       {/* User stats cards(total projects, total tasks, completed projects, competion rate) */}
       <UserStatCards projects={projects} />
 
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-2xl font-bold">Your Projects</p>
-          <p className="text-gray-600 mt-1">
-            Manage and track your project progress
-          </p>
-        </div>
-        <button
-          onClick={() => setCreateProjectIsOpen(true)}
-          className="btn-primary  "
-        >
-          <FaPlus />
-          New Project
-        </button>
-      </div>
+      <SectionHeader
+        title="Your Projects"
+        subtitle="Manage and track your project progress"
+        buttonText="New Project"
+        ButtonIcon={FaPlus}
+        onButtonClick={() => setCreateProjectIsOpen(true)}
+        align="between"
+      />
 
       <ProjectList
         isFetchingProjects={isFetchingProjects}

@@ -5,7 +5,7 @@ import {
   FaRegClock,
   FaRegFolderOpen,
 } from "react-icons/fa";
-import StatCard from "./common/StatCard";
+import StatCard from "../common/StatCard";
 
 function UserStatCards({ projects }) {
   return (
