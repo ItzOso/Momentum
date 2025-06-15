@@ -66,7 +66,6 @@ function HomePage() {
       toast.success("Project created successfully!");
     } catch (error) {
       toast.error("Failed to create project. Please try again.");
-      throw error;
     }
   };
   return (

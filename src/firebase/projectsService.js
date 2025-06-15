@@ -6,6 +6,8 @@ import {
   getDocs,
   query,
   serverTimestamp,
+  Timestamp,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import toast from "react-hot-toast";
@@ -77,6 +79,43 @@ export const getProjectTasks = async (projectId) => {
       };
     });
     return projectTasks;
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const createProjectTask = async (projectId, taskInfo) => {
+  try {
+    const tasksRef = collection(db, "projects", projectId, "tasks");
+
+    const { dueDate, ...otherTaskInfo } = taskInfo;
+
+    const data = {
+      ...otherTaskInfo,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
+    if (dueDate) {
+      const dateObject = new Date(dueDate);
+
+      // Add validation to prevent saving an invalid date
+      if (!isNaN(dateObject.getTime())) {
+        data.dueDate = Timestamp.fromDate(dateObject);
+      } else {
+        throw new Error("Invalid due date format provided.");
+      }
+    }
+
+    const taskRef = await addDoc(tasksRef, data);
+
+    const projectRef = doc(db, "projects", projectId);
+    await updateDoc(projectRef, {
+      updatedAt: serverTimestamp(),
+    });
+    // const taskRef = doc(db, "projects", projectId, "tasks", taskRef.id); <-- this is how to get the ref
+
+    return { id: taskRef.id, ...data };
   } catch (error) {
     throw error;
   }

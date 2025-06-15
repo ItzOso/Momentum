@@ -1,12 +1,17 @@
 import React, { useEffect, useState } from "react";
 import ProjectBoard from "../components/projects/ProjectBoard/ProjectBoard";
 import { useNavigate, useParams } from "react-router-dom";
-import { getProject, getProjectTasks } from "../firebase/projectsService";
+import {
+  createProjectTask,
+  getProject,
+  getProjectTasks,
+} from "../firebase/projectsService";
 import ProjectNotFound from "../components/projects/ProjectBoard/ProjectNotFound";
 import Spinner from "../components/common/Spinner";
 import TaskForm from "../components/projects/tasks/TaskForm";
 import { FaPlus } from "react-icons/fa";
 import ProjectHeader from "../components/projects/ProjectHeader";
+import toast from "react-hot-toast";
 
 function ProjectDetailsPage() {
   const [isFetchingProject, setIsFetchingProject] = useState(false);
@@ -23,11 +28,7 @@ function ProjectDetailsPage() {
         if (projectData) {
           setProject(projectData);
           const projectTasks = await getProjectTasks(projectData.id);
-          if (projectTasks.length != 0) {
-            setTasks(projectTasks);
-          } else {
-            setTasks(null);
-          }
+          setTasks(projectTasks);
         } else {
           setProject(null);
         }
@@ -40,6 +41,22 @@ function ProjectDetailsPage() {
     };
     fetchProject();
   }, [id]);
+
+  const handleCreateTask = async (formData) => {
+    try {
+      const newTaskData = await createProjectTask(project.id, formData); // returns newly created task and its id in an object
+      setTasks((prevTasks) => [
+        {
+          ...newTaskData,
+        },
+        ...prevTasks,
+      ]);
+      toast.success("Task created successfully!");
+    } catch (error) {
+      toast.error("Failed to create task. Please try again.");
+      console.log(error);
+    }
+  };
 
   if (isFetchingProject)
     return (
@@ -65,6 +82,7 @@ function ProjectDetailsPage() {
             subtitle="Add a new task to your project."
             Icon={FaPlus}
             buttonText="Create Task"
+            onSubmitFunction={handleCreateTask}
           />
         )}
       </div>

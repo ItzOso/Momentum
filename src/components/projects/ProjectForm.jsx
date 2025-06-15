@@ -13,7 +13,7 @@ function ProjectForm({ isOpen, setView, onSubmitFunction }) {
       setDescription("");
       setView(false);
     } catch (error) {
-      console.log("Error creating projcet:", error);
+      console.log("Error creating project:", error);
     }
   };
 
