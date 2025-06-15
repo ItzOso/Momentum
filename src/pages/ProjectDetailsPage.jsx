@@ -12,12 +12,15 @@ import TaskForm from "../components/projects/tasks/TaskForm";
 import { FaPlus } from "react-icons/fa";
 import ProjectHeader from "../components/projects/ProjectHeader";
 import toast from "react-hot-toast";
+import { useAuth } from "../contexts/AuthProvider";
 
 function ProjectDetailsPage() {
   const [isFetchingProject, setIsFetchingProject] = useState(false);
   const [createTaskIsOpen, setCreateTaskIsOpen] = useState(false);
   const [project, setProject] = useState({});
   const [tasks, setTasks] = useState([]);
+
+  const { currentUser } = useAuth();
 
   const { id } = useParams();
   useEffect(() => {
@@ -44,7 +47,11 @@ function ProjectDetailsPage() {
 
   const handleCreateTask = async (formData) => {
     try {
-      const newTaskData = await createProjectTask(project.id, formData); // returns newly created task and its id in an object
+      const newTaskData = await createProjectTask(
+        currentUser.uid,
+        project.id,
+        formData
+      ); // returns newly created task and its id in an object
       setTasks((prevTasks) => [
         {
           ...newTaskData,

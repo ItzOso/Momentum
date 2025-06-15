@@ -26,6 +26,7 @@ export const createProject = async (uid, projectInfo) => {
         { value: "in_progress", label: "In Progress" },
         { value: "done", label: "Done" },
       ],
+      members: [uid],
       tasksCount: 0,
       tasksDoneCount: 0,
       createdAt: serverTimestamp(),
@@ -84,13 +85,14 @@ export const getProjectTasks = async (projectId) => {
   }
 };
 
-export const createProjectTask = async (projectId, taskInfo) => {
+export const createProjectTask = async (uid, projectId, taskInfo) => {
   try {
     const tasksRef = collection(db, "projects", projectId, "tasks");
 
     const { dueDate, ...otherTaskInfo } = taskInfo;
 
     const data = {
+      uid,
       ...otherTaskInfo,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
