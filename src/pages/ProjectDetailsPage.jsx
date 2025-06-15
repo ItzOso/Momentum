@@ -5,9 +5,12 @@ import { getProject, getProjectTasks } from "../firebase/projectsService";
 import ProjectNotFound from "../components/projects/ProjectBoard/ProjectNotFound";
 import Spinner from "../components/common/Spinner";
 import TaskForm from "../components/projects/tasks/TaskForm";
+import { FaPlus } from "react-icons/fa";
+import ProjectHeader from "../components/projects/ProjectHeader";
 
 function ProjectDetailsPage() {
   const [isFetchingProject, setIsFetchingProject] = useState(false);
+  const [createTaskIsOpen, setCreateTaskIsOpen] = useState(false);
   const [project, setProject] = useState({});
   const [tasks, setTasks] = useState([]);
 
@@ -17,11 +20,9 @@ function ProjectDetailsPage() {
       setIsFetchingProject(true);
       try {
         const projectData = await getProject(id);
-        console.log(projectData);
         if (projectData) {
           setProject(projectData);
           const projectTasks = await getProjectTasks(projectData.id);
-          console.log(projectTasks);
           if (projectTasks.length != 0) {
             setTasks(projectTasks);
           } else {
@@ -49,9 +50,24 @@ function ProjectDetailsPage() {
 
   if (!project) return <ProjectNotFound />;
   return (
-    <div className="max-w-7xl space-y-8 px-4 mx-auto py-8">
-      <ProjectBoard project={project} tasks={tasks} />
-      <TaskForm />
+    <div>
+      <ProjectHeader
+        project={project}
+        setCreateTaskIsOpen={setCreateTaskIsOpen}
+      />
+      <div className="max-w-7xl space-y-8 px-4 mx-auto py-8">
+        <ProjectBoard project={project} tasks={tasks} />
+        {createTaskIsOpen && (
+          <TaskForm
+            project={project}
+            setView={setCreateTaskIsOpen}
+            title="Create New Task"
+            subtitle="Add a new task to your project."
+            Icon={FaPlus}
+            buttonText="Create Task"
+          />
+        )}
+      </div>
     </div>
   );
 }

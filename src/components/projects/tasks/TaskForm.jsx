@@ -1,19 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaPlus, FaRegEdit } from "react-icons/fa";
+import DropdownInput from "../../common/DropdownInput";
+function TaskForm({ project, title, subtitle, Icon, buttonText, setView }) {
+  const [selectedStatus, setSelectedStatus] = useState(
+    project?.taskStatuses?.[0]?.value
+  );
 
-function TaskForm() {
+  const handleStatusChange = (selectedOption) => {
+    // The dropdown passes the full { value, label } object back.
+    setSelectedStatus(selectedOption.value);
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/80 flex justify-center items-center">
-      <div className="card max-w-lg w-full flex flex-col gap-4">
+    <div
+      onClick={() => setView(false)}
+      className="fixed inset-0 bg-black/80 flex justify-center items-center p-4"
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="card max-w-lg w-full flex flex-col gap-4"
+      >
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bgGradient rounded-xl text-white flex items-center justify-center text-lg">
-            <FaPlus />
+            <Icon />
           </div>
           <div>
-            <p className="text-lg font-bold">Create New Task</p>
-            <p className="text-gray-600 text-sm">
-              Add a new task to your project.
-            </p>
+            <p className="text-lg font-bold">{title}</p>
+            <p className="text-gray-600 text-sm">{subtitle}</p>
           </div>
         </div>
         <form className="flex flex-col gap-4">
@@ -54,9 +67,12 @@ function TaskForm() {
               >
                 Status
               </label>
-              <button type="button" className="input text-start">
-                To Do
-              </button>
+              <DropdownInput
+                options={project?.taskStatuses}
+                value={selectedStatus}
+                onChange={handleStatusChange}
+                placeholder="Select a status..."
+              />
             </div>
             <div className="flex flex-col gap-2 w-full">
               <label
@@ -69,11 +85,15 @@ function TaskForm() {
             </div>
           </div>
           <div className="flex gap-2 justify-end">
-            <button type="button" className="btn-secondary">
+            <button
+              onClick={() => setView(false)}
+              type="button"
+              className="btn-secondary"
+            >
               Cancel
             </button>
             <button type="submit" className="btn-primary">
-              Create Task
+              {buttonText}
             </button>
           </div>
         </form>

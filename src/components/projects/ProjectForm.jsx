@@ -20,7 +20,7 @@ function ProjectForm({ isOpen, setView, onSubmitFunction }) {
   return (
     <div
       onClick={() => setView(false)}
-      className="fixed inset-0 bg-black/80 flex justify-center items-center"
+      className="fixed inset-0 bg-black/80 flex justify-center items-center p-4"
     >
       <div
         onClick={(e) => e.stopPropagation()}

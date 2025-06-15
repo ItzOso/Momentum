@@ -19,7 +19,11 @@ export const createProject = async (uid, projectInfo) => {
       uid,
       title: projectInfo.title,
       description: projectInfo.description,
-      taskStatuses: ["todo", "inprogress", "done"],
+      taskStatuses: [
+        { value: "todo", label: "To Do" },
+        { value: "in_progress", label: "In Progress" },
+        { value: "done", label: "Done" },
+      ],
       tasksCount: 0,
       tasksDoneCount: 0,
       createdAt: serverTimestamp(),
