@@ -7,7 +7,7 @@ import {
   FaRegTrashCan,
 } from "react-icons/fa6";
 import { useNavigate } from "react-router-dom";
-import DropdownModal from "../common/DropdownModal";
+import DropdownShell from "../common/DropdownShell";
 import { GoGear } from "react-icons/go";
 import { LuSettings } from "react-icons/lu";
 import { IoSettingsOutline } from "react-icons/io5";
@@ -43,7 +43,7 @@ function ProjectHeader({ project, setCreateTaskIsOpen }) {
             <FaPlus />
             New Task
           </button>
-          <DropdownModal
+          <DropdownShell
             trigger={
               <button type="button" className="btn-secondary">
                 <FaEllipsis />
@@ -58,7 +58,7 @@ function ProjectHeader({ project, setCreateTaskIsOpen }) {
                 <FaRegTrashCan /> Delete Project
               </button>
             </div>
-          </DropdownModal>
+          </DropdownShell>
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 
-function DropdownModal({ trigger, children }) {
+function DropdownShell({ trigger, children }) {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -31,4 +31,4 @@ function DropdownModal({ trigger, children }) {
   );
 }
 
-export default DropdownModal;
+export default DropdownShell;
