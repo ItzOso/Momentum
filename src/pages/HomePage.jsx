@@ -25,12 +25,14 @@ import ProjectCard from "../components/projects/ProjectCard";
 import ProjectList from "../components/projects/ProjectList";
 import UserStatCards from "../components/dashboard/UserStatCards";
 import SectionHeader from "../components/common/SectionHeader";
+import { useNavigate } from "react-router-dom";
 
 function HomePage() {
   const { currentUser } = useAuth();
   const [createProjectIsOpen, setCreateProjectIsOpen] = useState(false);
   const [projects, setProjects] = useState([]);
   const [isFetchingProjects, setIsFetchingProjects] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -51,8 +53,8 @@ function HomePage() {
     try {
       const newProjectData = await createProject(currentUser.uid, {
         // returns the newly created note and its id in an object
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
       });
       // create client timestamp because serverTimestamp() takes to long(do this for immediate client feedback)
       setProjects((prevProjects) => [
@@ -63,6 +65,7 @@ function HomePage() {
         },
         ...prevProjects,
       ]);
+      navigate(`/project/${newProjectData.id}`);
       toast.success("Project created successfully!");
     } catch (error) {
       toast.error("Failed to create project. Please try again.");

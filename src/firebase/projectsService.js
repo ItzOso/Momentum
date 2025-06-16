@@ -1,6 +1,7 @@
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -12,6 +13,7 @@ import {
 } from "firebase/firestore";
 import toast from "react-hot-toast";
 import { db } from "./firebaseConfig";
+import { orderBy } from "firebase/firestore";
 
 export const createProject = async (uid, projectInfo) => {
   try {
@@ -35,6 +37,33 @@ export const createProject = async (uid, projectInfo) => {
     const projectRef = await addDoc(projectsRef, data);
 
     return { id: projectRef.id, ...data };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteProject = async (projectId, tasks) => {
+  try {
+    tasks.forEach(async (task) => {
+      const taskRef = doc(db, "projects", projectId, "tasks", task.id);
+      await deleteDoc(taskRef);
+    });
+
+    const projectRef = doc(db, "projects", projectId);
+    await deleteDoc(projectRef);
+  } catch (error) {
+    throw errow;
+  }
+};
+
+export const updateProject = async (projectId, updates) => {
+  try {
+    const projectRef = doc(db, "projects", projectId);
+    console.log(updates);
+    await updateDoc(projectRef, {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
   } catch (error) {
     throw error;
   }
@@ -72,13 +101,12 @@ export const getProject = async (id) => {
 export const getProjectTasks = async (projectId) => {
   try {
     const tasksRef = collection(db, "projects", projectId, "tasks");
-    const tasksSnapshots = await getDocs(tasksRef);
-    const projectTasks = tasksSnapshots.docs.map((doc) => {
-      return {
-        ...doc.data(),
-        id: doc.id,
-      };
-    });
+    const q = query(tasksRef, orderBy("updatedAt", "asc")); // oldest first, newest at the end
+    const tasksSnapshots = await getDocs(q);
+    const projectTasks = tasksSnapshots.docs.map((doc) => ({
+      ...doc.data(),
+      id: doc.id,
+    }));
     return projectTasks;
   } catch (error) {
     throw error;
@@ -118,6 +146,23 @@ export const createProjectTask = async (uid, projectId, taskInfo) => {
     // const taskRef = doc(db, "projects", projectId, "tasks", taskRef.id); <-- this is how to get the ref
 
     return { id: taskRef.id, ...data };
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const updateProjectTask = async (projectId, taskId, updates) => {
+  try {
+    const taskRef = doc(db, "projects", projectId, "tasks", taskId);
+    await updateDoc(taskRef, {
+      ...updates,
+      updatedAt: serverTimestamp(),
+    });
+
+    const projectRef = doc(db, "projects", projectId);
+    await updateDoc(projectRef, {
+      updatedAt: serverTimestamp(),
+    });
   } catch (error) {
     throw error;
   }

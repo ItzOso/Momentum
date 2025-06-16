@@ -77,6 +77,7 @@ function ProjectDetailsPage() {
     <div>
       <ProjectHeader
         project={project}
+        tasks={tasks}
         setCreateTaskIsOpen={setCreateTaskIsOpen}
       />
       <div className="max-w-7xl space-y-8 px-4 mx-auto py-8">

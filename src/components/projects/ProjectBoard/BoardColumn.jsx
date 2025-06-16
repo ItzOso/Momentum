@@ -1,9 +1,18 @@
 import React from "react";
-import { FaInfo, FaInfoCircle } from "react-icons/fa";
+import { FaEdit, FaInfo, FaInfoCircle, FaRegEdit } from "react-icons/fa";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import TaskCard from "./TaskCard";
+import DropdownShell from "../../common/DropdownShell";
+import { FaEllipsis, FaRegTrashCan } from "react-icons/fa6";
+import { IoSettingsOutline } from "react-icons/io5";
+import ActionMenu from "../../common/ActionMenu";
 
-function BoardColumn({ name, Icon = IoMdInformationCircleOutline }) {
+function BoardColumn({
+  name,
+  tasks,
+  project,
+  Icon = IoMdInformationCircleOutline,
+}) {
   return (
     <div className="card hover:shadow-sm">
       <div className="flex items-center justify-between">
@@ -19,7 +28,11 @@ function BoardColumn({ name, Icon = IoMdInformationCircleOutline }) {
       </div>
 
       <div className="min-h-[400px] space-y-4 mt-4">
-        <div className="text-center">
+        {tasks.map((task) => (
+          <TaskCard key={task.id} task={task} project={project} />
+        ))}
+
+        {/* <div className="text-center">
           <div className="shadow-sm mx-auto mb-2 mt-20 rounded-full text-2xl w-12 h-12 flex items-center justify-center text-blue-500">
             <Icon />
           </div>
@@ -27,7 +40,7 @@ function BoardColumn({ name, Icon = IoMdInformationCircleOutline }) {
           <p className="text-sm text-gray-500 mt-1">
             Tasks will appear here when added
           </p>
-        </div>
+        </div> */}
       </div>
     </div>
   );

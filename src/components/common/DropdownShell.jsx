@@ -16,13 +16,13 @@ function DropdownShell({ trigger, children }) {
   }, [isOpen]);
 
   return (
-    <div className="w-full relative">
+    <div className="relative">
       <div onClick={() => setIsOpen(!isOpen)}>{trigger}</div>
 
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute right-0 top-full mt-2 card p-1 z-20"
+          className="absolute right-0 top-full mt-1 card p-1 z-20"
         >
           {children}
         </div>

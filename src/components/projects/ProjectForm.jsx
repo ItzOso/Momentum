@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { FaFolderPlus } from "react-icons/fa";
 
-function ProjectForm({ isOpen, setView, onSubmitFunction }) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+function ProjectForm({
+  setView,
+  onSubmitFunction,
+  formTitle = "Create New Project",
+  formSubtitle = "Add a new project to start organizing your tasks.",
+  buttonText = "Create Project",
+  ButtonIcon = FaFolderPlus,
+  initialValues = { title: "", description: "" },
+}) {
+  const [title, setTitle] = useState(initialValues?.title);
+  const [description, setDescription] = useState(initialValues?.description);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,7 +28,7 @@ function ProjectForm({ isOpen, setView, onSubmitFunction }) {
   return (
     <div
       onClick={() => setView(false)}
-      className="fixed inset-0 bg-black/80 flex justify-center items-center p-4"
+      className="fixed inset-0 z-50 bg-black/80 flex justify-center items-center p-4"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -28,13 +36,11 @@ function ProjectForm({ isOpen, setView, onSubmitFunction }) {
       >
         <div className="flex items-center gap-4">
           <div className="w-10 h-10 bgGradient rounded-xl text-white flex items-center justify-center text-lg">
-            <FaFolderPlus />
+            <ButtonIcon />
           </div>
           <div>
-            <p className="text-lg font-bold">Create New Project</p>
-            <p className="text-gray-600 text-sm">
-              Add a new project to start organizing your tasks.
-            </p>
+            <p className="text-lg font-bold">{formTitle}</p>
+            <p className="text-gray-600 text-sm">{formSubtitle}</p>
           </div>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -80,10 +86,10 @@ function ProjectForm({ isOpen, setView, onSubmitFunction }) {
             </button>
             <button
               type="submit"
-              disabled={!title.trim()}
+              disabled={!title?.trim()}
               className="btn-primary"
             >
-              Create Project
+              {buttonText}
             </button>
           </div>
         </form>

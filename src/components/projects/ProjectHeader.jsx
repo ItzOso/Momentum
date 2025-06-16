@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { FaPlus } from "react-icons/fa";
 import {
   FaArrowLeft,
@@ -11,13 +11,56 @@ import DropdownShell from "../common/DropdownShell";
 import { GoGear } from "react-icons/go";
 import { LuSettings } from "react-icons/lu";
 import { IoSettingsOutline } from "react-icons/io5";
+import ActionMenu from "../common/ActionMenu";
+import toast from "react-hot-toast";
+import { deleteProject, updateProject } from "../../firebase/projectsService";
+import ProjectForm from "./ProjectForm";
 
-function ProjectHeader({ project, setCreateTaskIsOpen }) {
+function ProjectHeader({ project, tasks, setCreateTaskIsOpen }) {
   const navigate = useNavigate();
   const totalTasks = project?.tasksCount || 0;
   const tasksDone = project?.tasksDoneCount || 0;
   const progress =
     totalTasks > 0 ? Math.floor((tasksDone / totalTasks) * 100) : 0;
+  const [updateProjectIsOpen, setUpdateProjectIsOpen] = useState(false);
+
+  const handleUpdateProject = async (title, description) => {
+    try {
+      await updateProject(project.id, {
+        title: title.trim(),
+        description: description.trim(),
+      });
+      setUpdateProjectIsOpen(false);
+      toast.success("Successfully updated project");
+    } catch (error) {
+      toast.error("Failed to update project. Please try again.");
+    }
+  };
+
+  const actionButtons = [
+    {
+      ButtonIcon: IoSettingsOutline,
+      buttonText: "Project Settings",
+      isDestructable: false,
+      onClick: () => {
+        setUpdateProjectIsOpen(true);
+      },
+    },
+    {
+      ButtonIcon: FaRegTrashCan,
+      buttonText: "Delete Project",
+      isDestructable: true,
+      onClick: async () => {
+        try {
+          await deleteProject(project.id, tasks);
+          navigate("/");
+          toast.success("Successfully deleted project");
+        } catch (error) {
+          toast.error("Failed to delete project. Please try again.");
+        }
+      },
+    },
+  ];
   return (
     <div className="shadow-xs bg-white">
       <div className="h-[64px] flex items-center justify-between max-w-7xl px-4 mx-auto">
@@ -50,17 +93,25 @@ function ProjectHeader({ project, setCreateTaskIsOpen }) {
               </button>
             }
           >
-            <div className="flex flex-col gap-1 w-48">
-              <button className="text-sm hover:bg-gray-100 rounded-lg p-2 flex items-center gap-4">
-                <IoSettingsOutline /> Project Settings
-              </button>
-              <button className="text-sm text-red-600 hover:bg-gray-100 rounded-lg p-2 flex items-center gap-4">
-                <FaRegTrashCan /> Delete Project
-              </button>
-            </div>
+            <ActionMenu actions={actionButtons} />
           </DropdownShell>
         </div>
       </div>
+
+      {updateProjectIsOpen && (
+        <ProjectForm
+          setView={setUpdateProjectIsOpen}
+          formTitle="Edit Project"
+          formSubtitle="Update your project details below."
+          ButtonIcon={IoSettingsOutline}
+          buttonText="Update Project"
+          initialValues={{
+            title: project.title,
+            description: project.description,
+          }}
+          onSubmitFunction={handleUpdateProject}
+        />
+      )}
     </div>
   );
 }
