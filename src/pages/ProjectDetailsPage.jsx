@@ -13,43 +13,46 @@ import { FaPlus } from "react-icons/fa";
 import ProjectHeader from "../components/projects/ProjectHeader";
 import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthProvider";
+import { useProjects } from "../contexts/ProjectsProvider";
 
 function ProjectDetailsPage() {
-  const [isFetchingProject, setIsFetchingProject] = useState(false);
   const [createTaskIsOpen, setCreateTaskIsOpen] = useState(false);
-  const [project, setProject] = useState({});
   const [tasks, setTasks] = useState([]);
 
   const { currentUser } = useAuth();
+  const { projects, loading: isLoadingProjects } = useProjects();
 
-  const { id } = useParams();
-  useEffect(() => {
-    const fetchProject = async () => {
-      setIsFetchingProject(true);
-      try {
-        const projectData = await getProject(id);
-        if (projectData) {
-          setProject(projectData);
-          const projectTasks = await getProjectTasks(projectData.id);
-          setTasks(projectTasks);
-        } else {
-          setProject(null);
-        }
-      } catch (error) {
-        console.log("An fetching project:", error);
-        setProject(null);
-      } finally {
-        setIsFetchingProject(false);
-      }
-    };
-    fetchProject();
-  }, [id]);
+  const { id: projectId } = useParams();
+
+  const project = projects.find((p) => p.id === projectId);
+
+  // useEffect(() => {
+  //   const fetchProject = async () => {
+  //     setIsFetchingProject(true);
+  //     try {
+  //       const projectData = await getProject(id);
+  //       if (projectData) {
+  //         setProject(projectData);
+  //         const projectTasks = await getProjectTasks(projectData.id);
+  //         setTasks(projectTasks);
+  //       } else {
+  //         setProject(null);
+  //       }
+  //     } catch (error) {
+  //       console.log("An fetching project:", error);
+  //       setProject(null);
+  //     } finally {
+  //       setIsFetchingProject(false);
+  //     }
+  //   };
+  //   fetchProject();
+  // }, [id]);
 
   const handleCreateTask = async (formData) => {
     try {
       const newTaskData = await createProjectTask(
         currentUser.uid,
-        project.id,
+        projectId,
         formData
       ); // returns newly created task and its id in an object
       setTasks((prevTasks) => [
@@ -65,7 +68,7 @@ function ProjectDetailsPage() {
     }
   };
 
-  if (isFetchingProject)
+  if (isLoadingProjects)
     return (
       <div className="fixed inset-0 flex items-center justify-center w-screen h-screen">
         <Spinner />

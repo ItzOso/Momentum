@@ -7,6 +7,7 @@ function ActionMenu({ actions }) {
         const { ButtonIcon, buttonText, isDestructable, onClick } = action;
         return (
           <button
+            key={action.buttonText}
             onClick={onClick}
             className={`text-sm hover:bg-gray-100 rounded-lg p-2 flex items-center gap-4 ${
               isDestructable && "text-red-600"
