@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "./AuthProvider";
 import {
   collection,
@@ -53,7 +53,7 @@ export const ProjectsProvider = ({ children }) => {
     );
 
     return () => unsubscribe();
-  }, []);
+  }, [currentUser]);
 
   const value = {
     projects,

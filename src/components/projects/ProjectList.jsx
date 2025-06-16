@@ -2,11 +2,14 @@ import React from "react";
 import { FaPlus, FaRegFolderOpen } from "react-icons/fa";
 import Spinner from "../common/Spinner";
 import ProjectCard from "./ProjectCard";
+import { useProjects } from "../../contexts/ProjectsProvider";
 
-function ProjectList({ isFetchingProjects, projects, setCreateProjectIsOpen }) {
+function ProjectList({ setCreateProjectIsOpen }) {
+  const { projects, loading } = useProjects();
+
   return (
     <div>
-      {isFetchingProjects ? (
+      {loading ? (
         <div className="w-fit mx-auto mt-36">
           <Spinner />
         </div>

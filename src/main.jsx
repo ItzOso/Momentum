@@ -5,13 +5,16 @@ import App from "./App.jsx";
 import React from "react";
 import { AuthProvider } from "./contexts/AuthProvider.jsx";
 import { BrowserRouter } from "react-router-dom";
+import { ProjectsProvider } from "./contexts/ProjectsProvider.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <AuthProvider>
-      <BrowserRouter>
-        <App />
-      </BrowserRouter>
+      <ProjectsProvider>
+        <BrowserRouter>
+          <App />
+        </BrowserRouter>
+      </ProjectsProvider>
     </AuthProvider>
   </StrictMode>
 );

@@ -1,53 +1,25 @@
 import React, { useEffect, useState } from "react";
 import { useAuth } from "../contexts/AuthProvider";
-import StatCard from "../components/common/StatCard";
-import {
-  FaChartLine,
-  FaClock,
-  FaFolderOpen,
-  FaPlus,
-  FaRegCheckCircle,
-  FaRegClock,
-  FaRegFolderOpen,
-} from "react-icons/fa";
+
+import { FaPlus } from "react-icons/fa";
 import ProjectForm from "../components/projects/ProjectForm";
 import toast from "react-hot-toast";
-import Spinner from "../components/common/Spinner";
-import {
-  addDoc,
-  collection,
-  serverTimestamp,
-  Timestamp,
-} from "firebase/firestore";
-import { db } from "../firebase/firebaseConfig";
+
+import { Timestamp } from "firebase/firestore";
+
 import { createProject, getUserProjects } from "../firebase/projectsService";
-import ProjectCard from "../components/projects/ProjectCard";
+
 import ProjectList from "../components/projects/ProjectList";
 import UserStatCards from "../components/dashboard/UserStatCards";
 import SectionHeader from "../components/common/SectionHeader";
 import { useNavigate } from "react-router-dom";
+import { useProjects } from "../contexts/ProjectsProvider";
 
 function HomePage() {
   const { currentUser } = useAuth();
   const [createProjectIsOpen, setCreateProjectIsOpen] = useState(false);
-  const [projects, setProjects] = useState([]);
-  const [isFetchingProjects, setIsFetchingProjects] = useState(false);
-  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProjects = async () => {
-      setIsFetchingProjects(true);
-      try {
-        const userProjects = await getUserProjects(currentUser.uid);
-        setProjects(userProjects);
-      } catch (error) {
-        toast.error("Failed to fetch projects. Try reloading page.");
-      } finally {
-        setIsFetchingProjects(false);
-      }
-    };
-    fetchProjects();
-  }, []);
+  const navigate = useNavigate();
 
   const handleCreateProject = async (title, description) => {
     try {
@@ -56,15 +28,6 @@ function HomePage() {
         title: title.trim(),
         description: description.trim(),
       });
-      // create client timestamp because serverTimestamp() takes to long(do this for immediate client feedback)
-      setProjects((prevProjects) => [
-        {
-          ...newProjectData,
-          createdAt: Timestamp.fromDate(new Date()),
-          updatedAt: Timestamp.fromDate(new Date()),
-        },
-        ...prevProjects,
-      ]);
       navigate(`/project/${newProjectData.id}`);
       toast.success("Project created successfully!");
     } catch (error) {
@@ -85,7 +48,7 @@ function HomePage() {
       </div>
 
       {/* User stats cards(total projects, total tasks, completed projects, competion rate) */}
-      <UserStatCards projects={projects} />
+      <UserStatCards />
 
       <SectionHeader
         title="Your Projects"
@@ -96,11 +59,7 @@ function HomePage() {
         align="between"
       />
 
-      <ProjectList
-        isFetchingProjects={isFetchingProjects}
-        projects={projects}
-        setCreateProjectIsOpen={setCreateProjectIsOpen}
-      />
+      <ProjectList setCreateProjectIsOpen={setCreateProjectIsOpen} />
 
       {createProjectIsOpen && (
         <ProjectForm

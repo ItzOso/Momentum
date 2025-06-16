@@ -6,8 +6,11 @@ import {
   FaRegFolderOpen,
 } from "react-icons/fa";
 import StatCard from "../common/StatCard";
+import { useProjects } from "../../contexts/ProjectsProvider";
 
-function UserStatCards({ projects }) {
+function UserStatCards() {
+  const { projects, loading } = useProjects();
+
   const totalTasks = projects.reduce(
     (total, project) => total + project.tasksCount,
     0
