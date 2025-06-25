@@ -53,20 +53,31 @@ function StatCard({
   stat = "0",
   color = "",
   Icon = TbFaceIdError,
+  style = "primary",
 }) {
   // Get the specific style object for the current color, or fallback to default
   const styles = colorStylesMap[color] || colorStylesMap.default;
 
   return (
     <div
-      className={`border rounded-lg p-6 flex justify-between shadow-xs hover:shadow-md transition-all items-center ${styles.containerBorder} ${styles.containerBg}`}
+      className={`card  flex ${
+        style === "secondary"
+          ? "flex-row-reverse gap-4 p-4 justify-end"
+          : `justify-between p-6 ${styles.containerBorder} ${styles.containerBg}`
+      }  shadow-xs hover:shadow-md transition-all items-center `}
     >
       <div>
         <p className={`${styles.titleText} font-medium text-sm`}>{title}</p>
         <p className={`${styles.statText} text-3xl font-bold`}>{stat}</p>
       </div>
       <div
-        className={`w-12 h-12 rounded-full flex justify-center items-center text-2xl text-white ${styles.iconContainerBg}`}
+        className={`${
+          style === "secondary"
+            ? "w-10 h-10 rounded-xl text-xl"
+            : "w-12 h-12 rounded-full text-2xl"
+        }  flex justify-center items-center  text-white ${
+          styles.iconContainerBg
+        }`}
       >
         <Icon />
       </div>

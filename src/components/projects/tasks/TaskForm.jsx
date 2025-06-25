@@ -8,13 +8,33 @@ function TaskForm({
   buttonText,
   setView,
   onSubmitFunction,
+  initialValues,
 }) {
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    status: project?.taskStatuses?.[0]?.value || "",
-    dueDate: "",
-  });
+  const [formData, setFormData] = useState(() => ({
+    title: initialValues?.title ?? "",
+    description: initialValues?.description ?? "",
+    status: initialValues?.status ?? (project?.taskStatuses?.[0]?.value || ""),
+    dueDate: initialValues?.dueDate
+      ? (() => {
+          // Handle Firebase Timestamp (seconds, nanoseconds)
+          if (
+            typeof initialValues.dueDate === "object" &&
+            initialValues.dueDate.seconds
+          ) {
+            const date = new Date(initialValues.dueDate.seconds * 1000);
+            return date.toISOString().slice(0, 10);
+          }
+          // If already a string or Date
+          if (typeof initialValues.dueDate === "string") {
+            return initialValues.dueDate;
+          }
+          if (initialValues.dueDate instanceof Date) {
+            return initialValues.dueDate.toISOString().slice(0, 10);
+          }
+          return "";
+        })()
+      : "",
+  }));
 
   const handleTitleChange = (value) => {
     setFormData((prev) => ({
@@ -63,7 +83,7 @@ function TaskForm({
   return (
     <div
       onClick={() => setView(false)}
-      className="fixed inset-0 bg-black/80 flex justify-center items-center p-4"
+      className="fixed z-50 inset-0 bg-black/80 flex justify-center items-center p-4"
     >
       <div
         onClick={(e) => e.stopPropagation()}
@@ -150,7 +170,11 @@ function TaskForm({
             >
               Cancel
             </button>
-            <button type="submit" className="btn-primary">
+            <button
+              disabled={!formData.title}
+              type="submit"
+              className="btn-primary"
+            >
               {buttonText}
             </button>
           </div>

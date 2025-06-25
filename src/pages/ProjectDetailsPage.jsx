@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import ProjectBoard from "../components/projects/ProjectBoard/ProjectBoard";
+import ProjectBoard from "../components/projects/ProjectBoard/ProjectKanbanBoard";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   createProjectTask,
@@ -14,10 +14,15 @@ import ProjectHeader from "../components/projects/ProjectHeader";
 import toast from "react-hot-toast";
 import { useAuth } from "../contexts/AuthProvider";
 import { useProjects } from "../contexts/ProjectsProvider";
+import { TasksProvider, useTasks } from "../contexts/TasksProvider";
+import ProjectStatCards from "../components/projects/ProjectStatCards";
+import ProjectTasksList from "../components/projects/ProjectBoard/ProjectListBoard";
+import ProjectListBoard from "../components/projects/ProjectBoard/ProjectListBoard";
+import ProjectKanbanBoard from "../components/projects/ProjectBoard/ProjectKanbanBoard";
 
 function ProjectDetailsPage() {
   const [createTaskIsOpen, setCreateTaskIsOpen] = useState(false);
-  const [tasks, setTasks] = useState([]);
+  const [tab, setTab] = useState("kanban");
 
   const { currentUser } = useAuth();
   const { projects, loading: isLoadingProjects } = useProjects();
@@ -26,41 +31,9 @@ function ProjectDetailsPage() {
 
   const project = projects.find((p) => p.id === projectId);
 
-  // useEffect(() => {
-  //   const fetchProject = async () => {
-  //     setIsFetchingProject(true);
-  //     try {
-  //       const projectData = await getProject(id);
-  //       if (projectData) {
-  //         setProject(projectData);
-  //         const projectTasks = await getProjectTasks(projectData.id);
-  //         setTasks(projectTasks);
-  //       } else {
-  //         setProject(null);
-  //       }
-  //     } catch (error) {
-  //       console.log("An fetching project:", error);
-  //       setProject(null);
-  //     } finally {
-  //       setIsFetchingProject(false);
-  //     }
-  //   };
-  //   fetchProject();
-  // }, [id]);
-
   const handleCreateTask = async (formData) => {
     try {
-      const newTaskData = await createProjectTask(
-        currentUser.uid,
-        projectId,
-        formData
-      ); // returns newly created task and its id in an object
-      setTasks((prevTasks) => [
-        {
-          ...newTaskData,
-        },
-        ...prevTasks,
-      ]);
+      await createProjectTask(currentUser.uid, projectId, formData); // returns newly created task and its id in an object
       toast.success("Task created successfully!");
     } catch (error) {
       toast.error("Failed to create task. Please try again.");
@@ -77,14 +50,43 @@ function ProjectDetailsPage() {
 
   if (!project) return <ProjectNotFound />;
   return (
-    <div>
+    <TasksProvider projectId={projectId}>
       <ProjectHeader
         project={project}
-        tasks={tasks}
         setCreateTaskIsOpen={setCreateTaskIsOpen}
       />
       <div className="max-w-7xl space-y-8 px-4 mx-auto py-8">
-        <ProjectBoard project={project} tasks={tasks} />
+        <ProjectStatCards project={project} />
+
+        <div className="card p-2 gap-2 grid grid-cols-1 sm:grid-cols-2">
+          <button
+            onClick={() => setTab("kanban")}
+            className={` h-8 ${
+              tab != "kanban"
+                ? "btn-secondary border-none text-gray-500"
+                : "btn-primary"
+            }`}
+          >
+            Kanban
+          </button>
+          <button
+            onClick={() => setTab("list")}
+            className={` h-8 ${
+              tab != "list"
+                ? "btn-secondary border-none text-gray-500"
+                : "btn-primary"
+            }`}
+          >
+            List
+          </button>
+        </div>
+
+        {tab === "kanban" ? (
+          <ProjectKanbanBoard project={project} />
+        ) : (
+          <ProjectListBoard project={project} />
+        )}
+
         {createTaskIsOpen && (
           <TaskForm
             project={project}
@@ -97,7 +99,7 @@ function ProjectDetailsPage() {
           />
         )}
       </div>
-    </div>
+    </TasksProvider>
   );
 }
 

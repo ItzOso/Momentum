@@ -42,7 +42,7 @@ function ProjectCard({ project }) {
         </div>
         <p className="text-xs font-medium text-gray-500 flex items-center justify-center gap-1">
           <FaRegCalendar />
-          {formatDate(project?.updatedAt)}
+          {formatDate(project?.updatedAt) || "loading..."}
         </p>
       </div>
     </div>

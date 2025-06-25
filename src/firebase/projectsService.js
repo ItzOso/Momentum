@@ -5,6 +5,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  increment,
   query,
   serverTimestamp,
   Timestamp,
@@ -52,7 +53,7 @@ export const deleteProject = async (projectId, tasks) => {
     const projectRef = doc(db, "projects", projectId);
     await deleteDoc(projectRef);
   } catch (error) {
-    throw errow;
+    throw error;
   }
 };
 
@@ -141,6 +142,7 @@ export const createProjectTask = async (uid, projectId, taskInfo) => {
 
     const projectRef = doc(db, "projects", projectId);
     await updateDoc(projectRef, {
+      tasksCount: increment(1),
       updatedAt: serverTimestamp(),
     });
     // const taskRef = doc(db, "projects", projectId, "tasks", taskRef.id); <-- this is how to get the ref
@@ -154,13 +156,64 @@ export const createProjectTask = async (uid, projectId, taskInfo) => {
 export const updateProjectTask = async (projectId, taskId, updates) => {
   try {
     const taskRef = doc(db, "projects", projectId, "tasks", taskId);
+
+    let prevTask = null;
+    let wasDone = false;
+    let isDone = false;
+    let tasksDoneInc = 0;
+
+    // Convert dueDate to Timestamp if present
+    if (updates.dueDate) {
+      const dateObject = new Date(updates.dueDate);
+      if (!isNaN(dateObject.getTime())) {
+        updates.dueDate = Timestamp.fromDate(dateObject);
+      } else {
+        throw new Error("Invalid due date format provided.");
+      }
+    }
+
+    // Only fetch previous task if status is being updated
+    if (updates.status) {
+      const prevTaskSnap = await getDoc(taskRef);
+      prevTask = prevTaskSnap.exists() ? prevTaskSnap.data() : null;
+      if (prevTask) {
+        wasDone = prevTask.status === "done";
+        isDone = updates.status === "done";
+        if (!wasDone && isDone) tasksDoneInc = 1;
+        else if (wasDone && !isDone) tasksDoneInc = -1;
+      }
+    }
+
     await updateDoc(taskRef, {
       ...updates,
       updatedAt: serverTimestamp(),
     });
 
     const projectRef = doc(db, "projects", projectId);
+
+    if (updates.status && prevTask && tasksDoneInc !== 0) {
+      await updateDoc(projectRef, {
+        tasksDoneCount: increment(tasksDoneInc),
+        updatedAt: serverTimestamp(),
+      });
+    } else {
+      await updateDoc(projectRef, {
+        updatedAt: serverTimestamp(),
+      });
+    }
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const deleteTask = async (projectId, taskId) => {
+  try {
+    const taskRef = doc(db, "projects", projectId, "tasks", taskId);
+    await deleteDoc(taskRef);
+
+    const projectRef = doc(db, "projects", projectId);
     await updateDoc(projectRef, {
+      tasksCount: increment(-1),
       updatedAt: serverTimestamp(),
     });
   } catch (error) {
