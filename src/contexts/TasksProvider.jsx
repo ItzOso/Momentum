@@ -2,6 +2,7 @@ import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { db } from "../firebase/firebaseConfig";
 import { useAuth } from "./AuthProvider";
+import toast from "react-hot-toast";
 
 const TasksContext = createContext();
 
