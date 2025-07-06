@@ -17,6 +17,7 @@ function TaskForm({
   setView,
   onSubmitFunction,
   initialValues,
+  tasks,
 }) {
   const [formData, setFormData] = useState(() => ({
     title: initialValues?.title ?? "",
@@ -116,7 +117,21 @@ function TaskForm({
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await onSubmitFunction(formData);
+      // Get the current highest order for the status
+      const tasksInStatus = tasks.filter((t) => t.status === formData.status);
+      const highestOrder = tasksInStatus.reduce(
+        (max, task) => Math.max(max, task.order || 0),
+        -1
+      );
+
+      // Add order and updatedAt to the form data
+      const taskData = {
+        ...formData,
+        order: highestOrder + 1,
+        updatedAt: new Date(),
+      };
+
+      await onSubmitFunction(taskData);
       setFormData({
         title: "",
         description: "",

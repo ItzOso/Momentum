@@ -13,6 +13,7 @@ export const useTasks = () => {
 export const TasksProvider = ({ children, projectId }) => {
   const [tasks, setTasks] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [optimisticUpdates, setOptimisticUpdates] = useState(new Map());
 
   const { currentUser } = useAuth();
 
@@ -38,6 +39,7 @@ export const TasksProvider = ({ children, projectId }) => {
           projectTasks.push({ id: doc.id, ...doc.data() });
         });
         setTasks(projectTasks);
+        setOptimisticUpdates(new Map()); // Clear optimistic updates when we get real data
         setLoading(false);
       },
       (error) => {
@@ -50,9 +52,37 @@ export const TasksProvider = ({ children, projectId }) => {
     return () => unsubscribe();
   }, [projectId, currentUser]);
 
+  // Apply optimistic updates to tasks
+  const getOptimisticTasks = () => {
+    if (optimisticUpdates.size === 0) return tasks;
+
+    return tasks.map((task) => {
+      const update = optimisticUpdates.get(task.id);
+      return update ? { ...task, ...update } : task;
+    });
+  };
+
+  const updateTaskOptimistically = (taskId, updates) => {
+    setOptimisticUpdates((prev) => {
+      const newUpdates = new Map(prev);
+      newUpdates.set(taskId, updates);
+      return newUpdates;
+    });
+  };
+
+  const clearOptimisticUpdate = (taskId) => {
+    setOptimisticUpdates((prev) => {
+      const newUpdates = new Map(prev);
+      newUpdates.delete(taskId);
+      return newUpdates;
+    });
+  };
+
   const value = {
-    tasks,
+    tasks: getOptimisticTasks(),
     loading,
+    updateTaskOptimistically,
+    clearOptimisticUpdate,
   };
 
   return (

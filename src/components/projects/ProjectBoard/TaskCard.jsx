@@ -21,6 +21,7 @@ import TaskForm from "../tasks/TaskForm";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAuth } from "../../../contexts/AuthProvider";
+import { Draggable } from "@hello-pangea/dnd";
 
 const PRIORITY_STYLES = {
   high: {
@@ -40,7 +41,7 @@ const PRIORITY_STYLES = {
   },
 };
 
-function TaskCard({ task, project, forList = false }) {
+function TaskCard({ task, project, forList = false, index, tasks }) {
   const { currentUser } = useAuth();
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [isEditTaskOpen, setIsEditTaskOpen] = useState(false);
@@ -214,202 +215,220 @@ function TaskCard({ task, project, forList = false }) {
   const statusObj = project?.taskStatuses?.find((s) => s.value === task.status);
 
   return (
-    <div
-      className={`card ${
-        forList ? `border-l-4 ${style.border}` : "p-4"
-      } hover:shadow-md transition-all`}
-    >
-      <div className="flex flex-col gap-3">
-        {/* Header Section */}
-        <div className="flex justify-between items-start">
-          <div className="flex flex-col gap-2">
-            <div className="flex items-center gap-2 flex-wrap">
-              <p className={`font-semibold ${forList ? "text-lg" : "text-sm"}`}>
-                {title}
-              </p>
-              <div className="flex gap-2 items-center flex-wrap">
-                {forList && (
+    <Draggable draggableId={task.id} index={index}>
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.draggableProps}
+          {...provided.dragHandleProps}
+          className={`card ${
+            forList ? `border-l-4 ${style.border}` : "p-4"
+          } hover:shadow-md transition-all ${
+            snapshot.isDragging
+              ? "shadow-lg ring-2 ring-blue-500 ring-opacity-50"
+              : ""
+          }`}
+        >
+          <div className="flex flex-col gap-3">
+            {/* Header Section */}
+            <div className="flex justify-between items-start">
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <p
-                    className={`py-1 px-3 ${style.count} rounded-2xl text-xs font-medium`}
+                    className={`font-semibold ${
+                      forList ? "text-lg" : "text-sm"
+                    }`}
                   >
-                    {statusObj?.label || currentStatus}
+                    {title}
                   </p>
+                  <div className="flex gap-2 items-center flex-wrap">
+                    {forList && (
+                      <p
+                        className={`py-1 px-3 ${style.count} rounded-2xl text-xs font-medium`}
+                      >
+                        {statusObj?.label || currentStatus}
+                      </p>
+                    )}
+                    <p
+                      className={`py-1 px-3 ${priorityStyle.bg} ${priorityStyle.text} border ${priorityStyle.border} rounded-2xl text-xs font-medium`}
+                    >
+                      {priority.charAt(0).toUpperCase() + priority.slice(1)}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Description Section */}
+                {description && (
+                  <div className="prose prose-sm max-w-none text-xs line-clamp-3">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {description}
+                    </ReactMarkdown>
+                  </div>
                 )}
-                <p
-                  className={`py-1 px-3 ${priorityStyle.bg} ${priorityStyle.text} border ${priorityStyle.border} rounded-2xl text-xs font-medium`}
-                >
-                  {priority.charAt(0).toUpperCase() + priority.slice(1)}
-                </p>
+
+                {/* Metadata Section */}
+                <div className="flex items-center gap-3 flex-wrap text-sm text-gray-600">
+                  {dueDate && (
+                    <div className="flex items-center gap-1">
+                      <IoTimeOutline className="text-gray-400" />
+                      <span>{formatDate(dueDate)}</span>
+                      {dueDateStatus && (
+                        <span
+                          className={`px-2 py-0.5 rounded-full text-xs ${dueDateStatus.style}`}
+                        >
+                          {dueDateStatus.label}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {checklist.length > 0 && (
+                    <button
+                      onClick={() => setShowChecklist(!showChecklist)}
+                      className="flex items-center gap-1 hover:text-gray-800"
+                    >
+                      <FaRegCheckSquare className="text-gray-400" />
+                      <span>{`${completedItems}/${totalItems}`}</span>
+                    </button>
+                  )}
+
+                  {comments.length > 0 && (
+                    <button
+                      onClick={() => setShowComments(!showComments)}
+                      className="flex items-center gap-1 hover:text-gray-800"
+                    >
+                      <FaRegComment className="text-gray-400" />
+                      <span>{comments.length}</span>
+                    </button>
+                  )}
+                </div>
               </div>
+
+              <DropdownShell
+                trigger={
+                  <button className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded-lg">
+                    <FaEllipsis />
+                  </button>
+                }
+              >
+                <div className="space-y-1">
+                  <DropdownInput
+                    options={project?.taskStatuses}
+                    value={currentStatus}
+                    onChange={handleStatusChange}
+                    placeholder="Select a status..."
+                  />
+                  <ActionMenu actions={actionButtons} />
+                </div>
+              </DropdownShell>
             </div>
 
-            {/* Description Section */}
-            {description && (
-              <div className="prose prose-sm max-w-none text-xs line-clamp-3">
-                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {description}
-                </ReactMarkdown>
+            {/* Checklist Section */}
+            {showChecklist && checklist.length > 0 && (
+              <div className="mt-2 space-y-2">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-sm">Checklist</h4>
+                  <div className="text-xs text-gray-600">{`${checklistProgress}% complete`}</div>
+                </div>
+                <div className="space-y-2">
+                  {checklist.map((item, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 group"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={item.completed}
+                        onChange={() => toggleChecklistItem(index)}
+                        className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                      />
+                      <span
+                        className={`flex-1 text-sm ${
+                          item.completed ? "line-through text-gray-500" : ""
+                        }`}
+                      >
+                        {item.text}
+                      </span>
+                      <button
+                        onClick={() => toggleChecklistItem(index)}
+                        className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600"
+                      >
+                        <FaCheck size={12} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
-            {/* Metadata Section */}
-            <div className="flex items-center gap-3 flex-wrap text-sm text-gray-600">
-              {dueDate && (
-                <div className="flex items-center gap-1">
-                  <IoTimeOutline className="text-gray-400" />
-                  <span>{formatDate(dueDate)}</span>
-                  {dueDateStatus && (
-                    <span
-                      className={`px-2 py-0.5 rounded-full text-xs ${dueDateStatus.style}`}
+            {/* Comments Section */}
+            {showComments && (
+              <div className="mt-2 space-y-3">
+                <h4 className="font-medium text-sm">Comments</h4>
+                <div className="space-y-3">
+                  {comments.map((comment, index) => (
+                    <div
+                      key={index}
+                      className="flex flex-col gap-1 p-2 rounded-lg bg-gray-50"
                     >
-                      {dueDateStatus.label}
-                    </span>
-                  )}
+                      <div className="flex justify-between items-start">
+                        <p className="text-sm font-medium">
+                          {comment.userEmail}
+                        </p>
+                        <span className="text-xs text-gray-500">
+                          {formatDate(comment.createdAt)}
+                        </span>
+                      </div>
+                      <p className="text-sm text-gray-700">{comment.text}</p>
+                    </div>
+                  ))}
+                  <form onSubmit={handleAddComment} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Add a comment..."
+                      className="flex-1 input text-sm py-1.5"
+                    />
+                    <button
+                      type="submit"
+                      disabled={!newComment.trim()}
+                      className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      Send
+                    </button>
+                  </form>
                 </div>
-              )}
-
-              {checklist.length > 0 && (
-                <button
-                  onClick={() => setShowChecklist(!showChecklist)}
-                  className="flex items-center gap-1 hover:text-gray-800"
-                >
-                  <FaRegCheckSquare className="text-gray-400" />
-                  <span>{`${completedItems}/${totalItems}`}</span>
-                </button>
-              )}
-
-              {comments.length > 0 && (
-                <button
-                  onClick={() => setShowComments(!showComments)}
-                  className="flex items-center gap-1 hover:text-gray-800"
-                >
-                  <FaRegComment className="text-gray-400" />
-                  <span>{comments.length}</span>
-                </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
 
-          <DropdownShell
-            trigger={
-              <button className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded-lg">
-                <FaEllipsis />
-              </button>
-            }
-          >
-            <div className="space-y-1">
-              <DropdownInput
-                options={project?.taskStatuses}
-                value={currentStatus}
-                onChange={handleStatusChange}
-                placeholder="Select a status..."
-              />
-              <ActionMenu actions={actionButtons} />
-            </div>
-          </DropdownShell>
+          {isConfirmDeleteOpen && (
+            <ConfirmActionModal
+              title="Delete Task"
+              message="Are you sure you want to delete this task? This action cannot be undone."
+              confirmText="Delete"
+              onConfirm={handleDeleteTask}
+              setIsOpen={setIsConfirmDeleteOpen}
+            />
+          )}
+
+          {isEditTaskOpen && (
+            <TaskForm
+              project={project}
+              title="Edit Task"
+              subtitle="Update task details"
+              Icon={FaRegEdit}
+              buttonText="Save Changes"
+              setView={setIsEditTaskOpen}
+              onSubmitFunction={handleUpdateTask}
+              initialValues={task}
+              tasks={tasks}
+            />
+          )}
         </div>
-
-        {/* Checklist Section */}
-        {showChecklist && checklist.length > 0 && (
-          <div className="mt-2 space-y-2">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-medium text-sm">Checklist</h4>
-              <div className="text-xs text-gray-600">{`${checklistProgress}% complete`}</div>
-            </div>
-            <div className="space-y-2">
-              {checklist.map((item, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50 group"
-                >
-                  <input
-                    type="checkbox"
-                    checked={item.completed}
-                    onChange={() => toggleChecklistItem(index)}
-                    className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                  />
-                  <span
-                    className={`flex-1 text-sm ${
-                      item.completed ? "line-through text-gray-500" : ""
-                    }`}
-                  >
-                    {item.text}
-                  </span>
-                  <button
-                    onClick={() => toggleChecklistItem(index)}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity text-gray-400 hover:text-gray-600"
-                  >
-                    <FaCheck size={12} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Comments Section */}
-        {showComments && (
-          <div className="mt-2 space-y-3">
-            <h4 className="font-medium text-sm">Comments</h4>
-            <div className="space-y-3">
-              {comments.map((comment, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col gap-1 p-2 rounded-lg bg-gray-50"
-                >
-                  <div className="flex justify-between items-start">
-                    <p className="text-sm font-medium">{comment.userEmail}</p>
-                    <span className="text-xs text-gray-500">
-                      {formatDate(comment.createdAt)}
-                    </span>
-                  </div>
-                  <p className="text-sm text-gray-700">{comment.text}</p>
-                </div>
-              ))}
-              <form onSubmit={handleAddComment} className="flex gap-2">
-                <input
-                  type="text"
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Add a comment..."
-                  className="flex-1 input text-sm py-1.5"
-                />
-                <button
-                  type="submit"
-                  disabled={!newComment.trim()}
-                  className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Send
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {isConfirmDeleteOpen && (
-        <ConfirmActionModal
-          title="Delete Task"
-          message="Are you sure you want to delete this task? This action cannot be undone."
-          confirmText="Delete"
-          onConfirm={handleDeleteTask}
-          setIsOpen={setIsConfirmDeleteOpen}
-        />
       )}
-
-      {isEditTaskOpen && (
-        <TaskForm
-          project={project}
-          title="Edit Task"
-          subtitle="Update task details"
-          Icon={FaRegEdit}
-          buttonText="Save Changes"
-          setView={setIsEditTaskOpen}
-          onSubmitFunction={handleUpdateTask}
-          initialValues={task}
-        />
-      )}
-    </div>
+    </Draggable>
   );
 }
 
