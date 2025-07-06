@@ -4,7 +4,7 @@ function ConfirmActionModal({
   title,
   subtitle,
   cancelText = "No, Cancel",
-  buttonText,
+  buttonText = "Yes, Delete",
   setView,
   onButtonClick,
 }) {
