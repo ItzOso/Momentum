@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import DropdownInput from "../../common/DropdownInput";
 import { FaPlus, FaTrash } from "react-icons/fa";
+import { useTasks } from "../../../contexts/TasksProvider";
 
 const PRIORITY_OPTIONS = [
   { value: "high", label: "High Priority", color: "red" },
@@ -17,8 +18,8 @@ function TaskForm({
   setView,
   onSubmitFunction,
   initialValues,
-  tasks,
 }) {
+  const { tasks } = useTasks(project.id);
   const [formData, setFormData] = useState(() => ({
     title: initialValues?.title ?? "",
     description: initialValues?.description ?? "",
