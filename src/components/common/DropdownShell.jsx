@@ -1,7 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 
-function DropdownShell({ trigger, children }) {
-  const [isOpen, setIsOpen] = useState(false);
+function DropdownShell({ trigger, children, isOpen, setIsOpen }) {
   const dropdownRef = useRef(null);
 
   useEffect(() => {
@@ -13,7 +12,7 @@ function DropdownShell({ trigger, children }) {
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [isOpen]);
+  }, [isOpen, setIsOpen]);
 
   return (
     <div className="relative">
@@ -30,5 +29,11 @@ function DropdownShell({ trigger, children }) {
     </div>
   );
 }
+
+// Add default props for backward compatibility
+DropdownShell.defaultProps = {
+  isOpen: undefined,
+  setIsOpen: undefined,
+};
 
 export default DropdownShell;

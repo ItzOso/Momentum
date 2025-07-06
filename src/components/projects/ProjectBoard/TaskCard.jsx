@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import DropdownShell from "../../common/DropdownShell";
 import {
   FaEllipsis,
@@ -48,6 +48,8 @@ function TaskCard({ task, project, forList = false, index, tasks }) {
   const [showComments, setShowComments] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
   const [newComment, setNewComment] = useState("");
+  const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+  const commentInputRef = useRef(null);
   const {
     title,
     description,
@@ -160,14 +162,28 @@ function TaskCard({ task, project, forList = false, index, tasks }) {
       isDestructable: false,
       onClick: () => {
         setIsEditTaskOpen(true);
+        setIsActionMenuOpen(false);
+      },
+    },
+    {
+      ButtonIcon: FaRegComment,
+      buttonText: "Add Comment",
+      isDestructable: false,
+      onClick: () => {
+        setShowComments(true);
+        setIsActionMenuOpen(false);
+        setTimeout(() => {
+          commentInputRef.current?.focus();
+        }, 0);
       },
     },
     {
       ButtonIcon: FaRegTrashCan,
-      buttonText: "DeleteTask",
+      buttonText: "Delete Task",
       isDestructable: true,
       onClick: () => {
         setIsConfirmDeleteOpen(true);
+        setIsActionMenuOpen(false);
       },
     },
   ];
@@ -287,13 +303,15 @@ function TaskCard({ task, project, forList = false, index, tasks }) {
                   className="flex items-center gap-1 hover:text-gray-800"
                 >
                   <FaRegComment className="text-gray-400" />
-                  <span>{comments.length}</span>
+                  <span>{comments.length || 0}</span>
                 </button>
               )}
             </div>
           </div>
 
           <DropdownShell
+            isOpen={isActionMenuOpen}
+            setIsOpen={setIsActionMenuOpen}
             trigger={
               <button className="cursor-pointer hover:bg-gray-100 px-2 py-1 rounded-lg">
                 <FaEllipsis />
@@ -371,6 +389,7 @@ function TaskCard({ task, project, forList = false, index, tasks }) {
               ))}
               <form onSubmit={handleAddComment} className="flex gap-2">
                 <input
+                  ref={commentInputRef}
                   type="text"
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
@@ -380,7 +399,7 @@ function TaskCard({ task, project, forList = false, index, tasks }) {
                 <button
                   type="submit"
                   disabled={!newComment.trim()}
-                  className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="btn-primary"
                 >
                   Send
                 </button>
