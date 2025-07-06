@@ -30,6 +30,7 @@ import { useAuth } from "../../../contexts/AuthProvider";
 import { Draggable } from "@hello-pangea/dnd";
 import { formatDate } from "../../../utils/helpers";
 import { useTasks } from "../../../contexts/TasksProvider";
+import { Timestamp } from "firebase/firestore";
 
 const PRIORITY_STYLES = {
   high: {
@@ -437,9 +438,13 @@ function TaskCard({ task, project, forList = false, index, tasks }) {
                 >
                   <div className="flex justify-between items-start">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium">{comment.userEmail}</p>
+                      <p className="text-sm font-medium">
+                        {comment.userEmail.split("@")[0]}
+                      </p>
                       <span className="text-xs text-gray-500">
-                        {formatDate(new Date(comment.createdAt))}
+                        {formatDate(
+                          Timestamp.fromDate(new Date(comment.updatedAt))
+                        )}
                         {comment.updatedAt !== comment.createdAt && " (edited)"}
                       </span>
                     </div>
