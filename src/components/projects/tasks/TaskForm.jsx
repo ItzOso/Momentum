@@ -1,5 +1,12 @@
 import React, { useState } from "react";
 import DropdownInput from "../../common/DropdownInput";
+
+const PRIORITY_OPTIONS = [
+  { value: "high", label: "High Priority", color: "red" },
+  { value: "medium", label: "Medium Priority", color: "yellow" },
+  { value: "low", label: "Low Priority", color: "blue" },
+];
+
 function TaskForm({
   project,
   title,
@@ -14,6 +21,7 @@ function TaskForm({
     title: initialValues?.title ?? "",
     description: initialValues?.description ?? "",
     status: initialValues?.status ?? (project?.taskStatuses?.[0]?.value || ""),
+    priority: initialValues?.priority ?? "medium",
     dueDate: initialValues?.dueDate
       ? (() => {
           // Handle Firebase Timestamp (seconds, nanoseconds)
@@ -64,6 +72,13 @@ function TaskForm({
     }));
   };
 
+  const handlePriorityChange = (selectedOption) => {
+    setFormData((prev) => ({
+      ...prev,
+      priority: selectedOption.value,
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -72,6 +87,7 @@ function TaskForm({
         title: "",
         description: "",
         status: project?.taskStatuses?.[0]?.value || "",
+        priority: "medium",
         dueDate: "",
       });
       setView(false);
@@ -149,19 +165,35 @@ function TaskForm({
             </div>
             <div className="flex flex-col gap-2 w-full">
               <label
-                htmlFor="taskDueDate"
+                htmlFor="taskPriority"
                 className="text-sm font-medium text-gray-600"
               >
-                Due Date (Optional)
+                Priority
               </label>
-              <input
-                onChange={(e) => handleDueDateChange(e.target.value)}
-                value={formData.dueDate}
-                type="date"
-                className="input"
+              <DropdownInput
+                options={PRIORITY_OPTIONS}
+                value={formData.priority}
+                onChange={handlePriorityChange}
+                placeholder="Select priority..."
               />
             </div>
           </div>
+
+          <div className="flex flex-col gap-2 w-full">
+            <label
+              htmlFor="taskDueDate"
+              className="text-sm font-medium text-gray-600"
+            >
+              Due Date (Optional)
+            </label>
+            <input
+              onChange={(e) => handleDueDateChange(e.target.value)}
+              value={formData.dueDate}
+              type="date"
+              className="input"
+            />
+          </div>
+
           <div className="flex gap-2 justify-end">
             <button
               onClick={() => setView(false)}

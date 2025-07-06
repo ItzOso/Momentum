@@ -7,6 +7,13 @@ import { useProjects } from "../../contexts/ProjectsProvider";
 function ProjectList({ setCreateProjectIsOpen }) {
   const { projects, loading } = useProjects();
 
+  // Sort projects: favorites first, then by updatedAt date
+  const sortedProjects = [...projects].sort((a, b) => {
+    if (a.isFavorite && !b.isFavorite) return -1;
+    if (!a.isFavorite && b.isFavorite) return 1;
+    return b.updatedAt?.seconds - a.updatedAt?.seconds;
+  });
+
   return (
     <div>
       {loading ? (
@@ -16,7 +23,7 @@ function ProjectList({ setCreateProjectIsOpen }) {
       ) : projects.length != 0 ? (
         // if they have at least 1 project
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {projects.map((project) => (
+          {sortedProjects.map((project) => (
             <ProjectCard key={project.id} project={project} />
           ))}
         </div>

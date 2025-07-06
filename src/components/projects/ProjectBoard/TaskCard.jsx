@@ -12,12 +12,35 @@ import {
 } from "../../../firebase/projectsService";
 import ConfirmActionModal from "../../common/ConfirmActionModal";
 import TaskForm from "../tasks/TaskForm";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+
+const PRIORITY_STYLES = {
+  high: {
+    bg: "bg-red-100",
+    text: "text-red-700",
+    border: "border-red-200",
+  },
+  medium: {
+    bg: "bg-yellow-100",
+    text: "text-yellow-700",
+    border: "border-yellow-200",
+  },
+  low: {
+    bg: "bg-blue-100",
+    text: "text-blue-700",
+    border: "border-blue-200",
+  },
+};
 
 function TaskCard({ task, project, forList = false }) {
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [isEditTaskOpen, setIsEditTaskOpen] = useState(false);
-  const { title, description, status, dueDate } = task;
+  const { title, description, status, dueDate, priority = "medium" } = task;
   const [currentStatus, setCurrentStatus] = useState(status);
+
+  const priorityStyle = PRIORITY_STYLES[priority] || PRIORITY_STYLES.medium;
+
   const handleStatusChange = async (selectedOption) => {
     try {
       setCurrentStatus(selectedOption.value);
@@ -100,16 +123,23 @@ function TaskCard({ task, project, forList = false }) {
     >
       <div className="flex justify-between items-start">
         <div className="flex items-center gap-2">
-          <p className={`font-semibold  ${forList ? "text-lg" : "text-sm"}`}>
+          <p className={`font-semibold ${forList ? "text-lg" : "text-sm"}`}>
             {title}
           </p>
-          {forList && (
+          <div className="flex gap-2 items-center">
+            {forList && (
+              <p
+                className={`py-1 px-3 ${style.count} rounded-2xl text-xs font-medium`}
+              >
+                {statusObj?.label || currentStatus}
+              </p>
+            )}
             <p
-              className={`py-1 px-3 ${style.count} rounded-2xl text-xs font-medium`}
+              className={`py-1 px-3 ${priorityStyle.bg} ${priorityStyle.text} border ${priorityStyle.border} rounded-2xl text-xs font-medium`}
             >
-              {statusObj?.label || currentStatus}
+              {priority.charAt(0).toUpperCase() + priority.slice(1)}
             </p>
-          )}
+          </div>
         </div>
         <DropdownShell
           trigger={
@@ -129,9 +159,15 @@ function TaskCard({ task, project, forList = false }) {
           </div>
         </DropdownShell>
       </div>
-      <p className={`${!forList && "text-sm"} text-gray-600 line-clamp-2`}>
-        {description}
-      </p>
+      <div
+        className={`${
+          !forList && "text-sm"
+        } text-gray-600 prose prose-sm max-w-none mt-2`}
+      >
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {description || ""}
+        </ReactMarkdown>
+      </div>
       {dueDate && (
         <p
           className={`flex items-center gap-1 ${
