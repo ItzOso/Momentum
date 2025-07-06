@@ -6,9 +6,15 @@ import {
   FaRegTrashCan,
   FaRegComment,
   FaCheck,
+  FaPen,
 } from "react-icons/fa6";
 import ActionMenu from "../../common/ActionMenu";
-import { FaRegCheckSquare, FaRegEdit, FaPlus } from "react-icons/fa";
+import {
+  FaRegCheckSquare,
+  FaRegEdit,
+  FaPlus,
+  FaRegTrashAlt,
+} from "react-icons/fa";
 import { IoTimeOutline } from "react-icons/io5";
 import DropdownInput from "../../common/DropdownInput";
 import toast from "react-hot-toast";
@@ -22,6 +28,8 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { useAuth } from "../../../contexts/AuthProvider";
 import { Draggable } from "@hello-pangea/dnd";
+import { formatDate } from "../../../utils/helpers";
+import { useTasks } from "../../../contexts/TasksProvider";
 
 const PRIORITY_STYLES = {
   high: {
@@ -43,12 +51,16 @@ const PRIORITY_STYLES = {
 
 function TaskCard({ task, project, forList = false, index, tasks }) {
   const { currentUser } = useAuth();
+  const { updateTask } = useTasks();
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [isEditTaskOpen, setIsEditTaskOpen] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [showChecklist, setShowChecklist] = useState(false);
   const [newComment, setNewComment] = useState("");
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editCommentText, setEditCommentText] = useState("");
+  const [commentToDelete, setCommentToDelete] = useState(null);
   const commentInputRef = useRef(null);
   const {
     title,
@@ -62,17 +74,6 @@ function TaskCard({ task, project, forList = false, index, tasks }) {
   const [currentStatus, setCurrentStatus] = useState(status);
 
   const priorityStyle = PRIORITY_STYLES[priority] || PRIORITY_STYLES.medium;
-
-  const formatDate = (date) => {
-    if (!date) return "";
-    const d = date.toDate();
-    return new Intl.DateTimeFormat("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    }).format(d);
-  };
 
   const getDueDateStatus = () => {
     if (!dueDate) return null;
@@ -124,22 +125,80 @@ function TaskCard({ task, project, forList = false, index, tasks }) {
     e.preventDefault();
     if (!newComment.trim()) return;
 
-    const comment = {
-      text: newComment.trim(),
-      createdAt: new Date(),
-      userId: currentUser.uid,
-      userEmail: currentUser.email,
-    };
-
     try {
+      const comment = {
+        id: Date.now().toString(),
+        text: newComment.trim(),
+        userEmail: currentUser.email,
+        userId: currentUser.uid,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+
+      const updatedTask = {
+        ...task,
+        comments: [...task.comments, comment],
+      };
+
       await updateProjectTask(project.id, task.id, {
-        comments: [...comments, comment],
+        comments: updatedTask.comments,
       });
       setNewComment("");
-      toast.success("Comment added");
     } catch (error) {
+      console.error("Failed to add comment:", error);
       toast.error("Failed to add comment");
     }
+  };
+
+  const handleEditComment = async (commentId) => {
+    if (!editCommentText.trim()) return;
+
+    try {
+      const updatedComments = task.comments.map((comment) => {
+        if (comment.id === commentId) {
+          return {
+            ...comment,
+            text: editCommentText.trim(),
+            updatedAt: new Date().toISOString(),
+          };
+        }
+        return comment;
+      });
+
+      await updateProjectTask(project.id, task.id, {
+        comments: updatedComments,
+      });
+      setEditingCommentId(null);
+      setEditCommentText("");
+    } catch (error) {
+      console.error("Failed to edit comment:", error);
+      toast.error("Failed to edit comment");
+    }
+  };
+
+  const handleDeleteComment = async (commentId) => {
+    try {
+      const updatedComments = task.comments.filter(
+        (comment) => comment.id !== commentId
+      );
+      await updateProjectTask(project.id, task.id, {
+        comments: updatedComments,
+      });
+      setCommentToDelete(null);
+    } catch (error) {
+      console.error("Failed to delete comment:", error);
+      toast.error("Failed to delete comment");
+    }
+  };
+
+  const startEditingComment = (comment) => {
+    setEditingCommentId(comment.id);
+    setEditCommentText(comment.text);
+    // Focus the edit input after it renders
+    setTimeout(() => {
+      const editInput = document.getElementById(`comment-edit-${comment.id}`);
+      if (editInput) editInput.focus();
+    }, 0);
   };
 
   const handleStatusChange = async (selectedOption) => {
@@ -297,15 +356,13 @@ function TaskCard({ task, project, forList = false, index, tasks }) {
                 </button>
               )}
 
-              {comments.length > 0 && (
-                <button
-                  onClick={() => setShowComments(!showComments)}
-                  className="flex items-center gap-1 hover:text-gray-800"
-                >
-                  <FaRegComment className="text-gray-400" />
-                  <span>{comments.length || 0}</span>
-                </button>
-              )}
+              <button
+                onClick={() => setShowComments(!showComments)}
+                className="flex items-center gap-1 hover:text-gray-800"
+              >
+                <FaRegComment className="text-gray-400" />
+                <span>{comments.length || 0}</span>
+              </button>
             </div>
           </div>
 
@@ -373,18 +430,80 @@ function TaskCard({ task, project, forList = false, index, tasks }) {
           <div className="mt-2 space-y-3">
             <h4 className="font-medium text-sm">Comments</h4>
             <div className="space-y-3">
-              {comments.map((comment, index) => (
+              {comments.map((comment) => (
                 <div
-                  key={index}
-                  className="flex flex-col gap-1 p-2 rounded-lg bg-gray-50"
+                  key={comment.id}
+                  className="flex flex-col gap-1 p-2 rounded-lg bg-gray-50 group"
                 >
                   <div className="flex justify-between items-start">
-                    <p className="text-sm font-medium">{comment.userEmail}</p>
-                    <span className="text-xs text-gray-500">
-                      {formatDate(comment.createdAt)}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <p className="text-sm font-medium">{comment.userEmail}</p>
+                      <span className="text-xs text-gray-500">
+                        {formatDate(new Date(comment.createdAt))}
+                        {comment.updatedAt !== comment.createdAt && " (edited)"}
+                      </span>
+                    </div>
+                    {currentUser.uid === comment.userId && (
+                      <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={() => startEditingComment(comment)}
+                          className="text-gray-500 hover:text-gray-700"
+                          title="Edit comment"
+                        >
+                          <FaPen size={12} />
+                        </button>
+                        <button
+                          onClick={() => setCommentToDelete(comment)}
+                          className="text-gray-500 hover:text-red-600"
+                          title="Delete comment"
+                        >
+                          <FaRegTrashAlt size={12} />
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-sm text-gray-700">{comment.text}</p>
+                  {editingCommentId === comment.id ? (
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleEditComment(comment.id);
+                      }}
+                      className="flex gap-2 mt-1"
+                    >
+                      <input
+                        id={`comment-edit-${comment.id}`}
+                        type="text"
+                        value={editCommentText}
+                        onChange={(e) => setEditCommentText(e.target.value)}
+                        className="flex-1 input text-sm py-1.5"
+                      />
+                      <div className="flex gap-1">
+                        <button
+                          type="submit"
+                          disabled={!editCommentText.trim()}
+                          className="btn-primary text-xs py-1.5 px-3"
+                        >
+                          Save
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingCommentId(null);
+                            setEditCommentText("");
+                          }}
+                          className="btn-secondary text-xs py-1.5 px-3"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <div className="prose prose-sm max-w-none text-sm text-gray-700">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                        {comment.text}
+                      </ReactMarkdown>
+                    </div>
+                  )}
                 </div>
               ))}
               <form onSubmit={handleAddComment} className="flex gap-2">
@@ -393,7 +512,7 @@ function TaskCard({ task, project, forList = false, index, tasks }) {
                   type="text"
                   value={newComment}
                   onChange={(e) => setNewComment(e.target.value)}
-                  placeholder="Add a comment..."
+                  placeholder="Add a comment... (supports markdown)"
                   className="flex-1 input text-sm py-1.5"
                 />
                 <button
@@ -408,6 +527,16 @@ function TaskCard({ task, project, forList = false, index, tasks }) {
           </div>
         )}
       </div>
+
+      {commentToDelete && (
+        <ConfirmActionModal
+          title="Delete Comment"
+          subtitle="Are you sure you want to delete this comment? This action cannot be undone."
+          buttonText="Delete"
+          onButtonClick={() => handleDeleteComment(commentToDelete.id)}
+          setView={setCommentToDelete}
+        />
+      )}
 
       {isConfirmDeleteOpen && (
         <ConfirmActionModal
