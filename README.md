@@ -2,7 +2,7 @@
 
 Momentum is a modern, full-stack project management application that helps teams and individuals organize tasks, track project progress, and boost productivity with an intuitive Kanban board interface. Create projects, manage tasks with drag-and-drop functionality, and gain insights into your productivity with real-time analytics.
 
-## 🔗 [Live App](https://your-momentum-app.web.app/)
+## 🔗 [Live App](https://momentum-bd1d7.web.app/)
 
 ## 🚀 Features
 
